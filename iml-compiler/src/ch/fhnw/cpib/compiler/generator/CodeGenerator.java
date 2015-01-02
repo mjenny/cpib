@@ -2,7 +2,7 @@ package ch.fhnw.cpib.compiler.generator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.List;
 
 import ch.fhnw.cpib.compiler.error.GenerationError;
 import ch.fhnw.cpib.compiler.parser.AbsTree.DeclarationProcedure;
@@ -38,6 +38,16 @@ public class CodeGenerator {
 	 * The storage for the addresses of the variables
 	 */
 	private HashMap<String,Integer> variables = new HashMap<String,Integer>();
+	
+	/**
+	 * Helper for defined records
+	 */
+	private HashMap<String,List<TypedIdent>> records = new HashMap<String,List<TypedIdent>>();
+	
+	/**
+	 * Helper for initialized records
+	 */
+	private HashMap<String,List<TypedIdent>> initRecords = new HashMap<String,List<TypedIdent>>();
 	
 	/**
 	 * A multi dimension counter of commands
@@ -80,11 +90,13 @@ public class CodeGenerator {
 					TypedIdentIdent typedIdent = (TypedIdentIdent)((DeclarationStore) currentDeclaration).getTypedIdent();
 					//Check if TypeIdent is already declared
 					
-					if(variables.containsKey(typedIdent.getTypeIdent().getName())) {
+					if(records.containsKey(typedIdent.getTypeIdent().getName())) {
 						variables.put(typedIdent.getIdent().getName(), storeCount);
 						storeCount++;
 					}else throw new GenerationError("Record "+typedIdent.getTypeIdent().getName()+" is not declared!");	
 				}
+				
+			} else if (currentDeclaration instanceof DeclarationRecord) {
 				
 			}
 

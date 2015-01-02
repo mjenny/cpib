@@ -14,7 +14,7 @@ public enum SymbolList {
 	SEMICOLON(";", new Symbol.Semicolon()), 
 	COLON(":", new Symbol.Colon()),
 	BECOMES(":=", new Symbol.Becomes()),
-	DOTOPR(".", new Symbol.DotOpr()),
+	DOTOPR(".", new Operator.DotOpr()),
 	MULTOPR("*", new Operator.MultOpr(OperatorAttribute.TIMES)), 
 	PLUS("+", new Operator.AddOpr(OperatorAttribute.PLUS)), 
 	MINUS("-", new Operator.AddOpr(OperatorAttribute.MINUS)), 

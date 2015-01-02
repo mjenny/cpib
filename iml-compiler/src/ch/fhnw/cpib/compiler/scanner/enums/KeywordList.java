@@ -17,6 +17,7 @@ public enum KeywordList {
 	DIV("div", new Operator.MultOpr(OperatorAttribute.DIV)),
 	DEBUGIN("debugin", new Keyword.DebugIn()),
 	DEBUGOUT("debugout", new Keyword.DebugOut()),
+	DO("do", new Keyword.Do()),
 	ELSE("else", new Keyword.Else()), 
 	ENDIF("endif", new Keyword.EndIf()),
 	ENDWHILE("endwhile", new Keyword.EndWhile()),

@@ -87,6 +87,7 @@ public class Parser {
 			return new ConcTree.RepeatingOptionalDeclarationsEpsilon();
 		}
 	}
+	
 	private ConcTree.Declaration declaration() throws GrammarError {
 		switch(terminal) {
 			case FUN:
@@ -106,21 +107,44 @@ public class Parser {
 				throw new GrammarError("declaration got " + terminal, token.getLine());
 		}
 	}
+	
 	private ConcTree.RecordDeclaration recordDeclaration() throws GrammarError{
-		System.out.println("recordDeclaration ::= RECORD IDENT parameterStorageList");
+		System.out.println("recordDeclaration ::= RECORD IDENT recordFieldList");
 		consume(Terminals.RECORD);
 		Ident ident = (Ident) consume(Terminals.IDENT);
-		ParameterStorageList parameterStorageList = parameterStorageList();
-		return new ConcTree.RecordDeclaration(ident, parameterStorageList);
+		RecordFieldList recordFieldList = recordFieldList();
+		return new ConcTree.RecordDeclaration(ident, recordFieldList);
 	}
-	private ConcTree.ParameterStorageList parameterStorageList() throws GrammarError{
-		System.out.println("parameterStorageList ::= LPAREN storageDeclaration repeatingStorageDeclaration RPAREN");
+	
+	private ConcTree.RecordFieldList recordFieldList() throws GrammarError{
+		System.out.println("recordFieldList ::= LPAREN recordFieldDeclaration repeatingOptionalRecordFieldDeclaration RPAREN");
 		consume(Terminals.LPAREN);
-		StorageDeclaration storageDeclaration = storageDeclaration();
-		RepeatingOptionalStorageDeclarations repeatingOptionalStorageDeclarations = repeatingOptionalStorageDeclarations();
+		RecordFieldDeclaration recordFieldDeclaration = recordFieldDeclaration();
+		RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclarations = repeatingOptionalRecordFieldDeclarations();
 		consume(Terminals.RPAREN);
-		return new ParameterStorageList(storageDeclaration, repeatingOptionalStorageDeclarations);
+		return new RecordFieldList(recordFieldDeclaration, repeatingOptionalRecordFieldDeclarations);
 	}
+	
+	private ConcTree.RecordFieldDeclaration recordFieldDeclaration() throws GrammarError {
+		System.out.println("recordFieldDeclaration ::= optionalChangeMode typedIdent");
+		ConcTree.OptionalChangeMode optionalChangeMode = optionalChangeMode();
+		ConcTree.TypedIdent typedIdent = typedIdent();
+		return new ConcTree.RecordFieldDeclaration(optionalChangeMode, typedIdent);
+	}
+	
+	private ConcTree.RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclarations() throws GrammarError {
+		if(terminal == Terminals.SEMICOLON){
+			System.out.println("repeatingOptionalRecordFieldDeclarations ::= SEMICOLON recordFieldDeclaration repeatingOptionalRecordFieldDeclarations");
+			consume(Terminals.SEMICOLON);
+			RecordFieldDeclaration recordFieldDeclaration = recordFieldDeclaration();
+			RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclarations = repeatingOptionalRecordFieldDeclarations();
+			return new RepeatingOptionalRecordFieldDeclarations(recordFieldDeclaration, repeatingOptionalRecordFieldDeclarations);
+		} else {
+			System.out.println("RepeatingOptionalRecordFieldDeclarations ::= epsilon");
+			return new RepeatingOptionalRecordFieldDeclarationsEpsilon();
+		}
+	}
+	
 	private ConcTree.RepeatingOptionalStorageDeclarations repeatingOptionalStorageDeclarations() throws GrammarError {
 		if(terminal == Terminals.SEMICOLON){
 			System.out.println("repeatingOptionalStorageDeclarations ::= SEMICOLON storageDeclaration repeatingOptionalStorageDeclarations");
@@ -133,6 +157,7 @@ public class Parser {
 			return new RepeatingOptionalStorageDeclarationsEpsilon();
 		}
 	}
+	
 	private ConcTree.StorageDeclaration storageDeclaration() throws GrammarError {
 		System.out.println("storageDeclaration ::= optionalChangeMode typedIdent");
 		ConcTree.OptionalChangeMode optionalChangeMode = optionalChangeMode();

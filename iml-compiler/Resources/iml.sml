@@ -89,7 +89,7 @@ datatype nonterm
   | declaration
   | repeatingOptionalDeclarations
   | recordDeclaration
-  | parameterStorageList
+  | recordFieldList
   | optionalCHANGEMODE
   | optionalFLOWMODE
   | optionalMECHMODE
@@ -134,59 +134,63 @@ datatype nonterm
   | optionalParameters
   | parameter
   | repeatingOptionalParameters
+  | recordFieldDeclaration
+  | repeatingOptionalRecordFieldDeclarations
 
 val string_of_nonterm =
-  fn expression                           => "expression"
-   | factor                               => "factor"
-   | declarations                         => "declarations"
-   | declaration	                      => "declaration"
-   | repeatingOptionalDeclarations        => "repeatingOptionalDeclarations"
-   | recordDeclaration                    => "recordDeclaration"
-   | parameterStorageList	              => "parameterStorageList"
-   | optionalCHANGEMODE                   => "optionalCHANGEMODE"
-   | optionalFLOWMODE                     => "optionalFLOWMODE"
-   | optionalMECHMODE                     => "optionalMECHMODE"
-   | storageDeclaration                   => "storageDeclaration"
-   | procedureDeclaration                 => "procedureDeclaration"
-   | functionDeclaration				  => "functionDeclaration"
-   | optionalGlobalImports                => "optionalGlobalImports"
-   | globalImport                         => "globalImport"
-   | repeatingOptionalGlobalImports       => "repeatingOptionalGlobalImports"
-   | program                              => "program"
-   | progamParameterList                  => "progamParameterList"
-   | optionalProgramParameters            => "optionalProgramParameters"
-   | blockCmd                             => "blockCmd"
-   | cmd                                  => "cmd"
-   | repeatingOptionalCmds                => "repeatingOptionalCmds"
-   | optionalGlobalInits                  => "optionalGlobalInits"
-   | idents                               => "idents"
-   | repeatingOptionalIdents              => "repeatingOptionalIdents"
-   | typedIdent                           => "typedIdent"
-   | typeDeclaration                      => "typeDeclaration"
-   | repeatingOptionalProgramParameters   => "repeatingOptionalProgramParameters"
-   | optionalGlobalDeclarations           => "optionalGlobalDeclarations"
-   | globalDeclaration                    => "globalDeclaration"
-   | repeatingOptionalGlobalDeclarations  => "repeatingOptionalGlobalDeclarations"
-   | optionalLocalStorageDeclarations     => "optionalLocalStorageDeclarations"
-   | repeatingOptionalStorageDeclarations => "repeatingOptionalStorageDeclarations"
-   | term1                                => "term1"
-   | repBOOLOPRterm1                      => "repBOOLOPRterm1"
-   | term2                                => "term2"
-   | repRELOPRterm2                       => "repRELOPRterm2"
-   | term3                                => "term3"
-   | repADDOPRterm3                       => "repADDOPRterm3"
-   | term4                                => "term4"
-   | repMULTOPRterm4                      => "repMULTOPRterm4"
-   | repDOTOPRfactor                      => "repDOTOPRfactor"
-   | optionalIdent                        => "optionalIdent"
-   | monadicOperator                      => "monadicOperator"
-   | expressionList                       => "expressionList"
-   | optionalExpressions                  => "optionalExpressions"
-   | repeatingOptionalExpressions         => "repeatingOptionalExpressions"
-   | parameterList                        => "parameterList"
-   | optionalParameters                   => "optionalParameters"
-   | parameter                            => "parameter"
-   | repeatingOptionalParameters          => "repeatingOptionalParameters"
+  fn expression                               => "expression"
+   | factor                                   => "factor"
+   | declarations                             => "declarations"
+   | declaration	                          => "declaration"
+   | repeatingOptionalDeclarations            => "repeatingOptionalDeclarations"
+   | recordDeclaration                        => "recordDeclaration"
+   | recordFieldList	                      => "recordFieldList"
+   | optionalCHANGEMODE                       => "optionalCHANGEMODE"
+   | optionalFLOWMODE                         => "optionalFLOWMODE"
+   | optionalMECHMODE                         => "optionalMECHMODE"
+   | storageDeclaration                       => "storageDeclaration"
+   | procedureDeclaration                     => "procedureDeclaration"
+   | functionDeclaration				      => "functionDeclaration"
+   | optionalGlobalImports                    => "optionalGlobalImports"
+   | globalImport                             => "globalImport"
+   | repeatingOptionalGlobalImports           => "repeatingOptionalGlobalImports"
+   | program                                  => "program"
+   | progamParameterList                      => "progamParameterList"
+   | optionalProgramParameters                => "optionalProgramParameters"
+   | blockCmd                                 => "blockCmd"
+   | cmd                                      => "cmd"
+   | repeatingOptionalCmds                    => "repeatingOptionalCmds"
+   | optionalGlobalInits                      => "optionalGlobalInits"
+   | idents                                   => "idents"
+   | repeatingOptionalIdents                  => "repeatingOptionalIdents"
+   | typedIdent                               => "typedIdent"
+   | typeDeclaration                          => "typeDeclaration"
+   | repeatingOptionalProgramParameters       => "repeatingOptionalProgramParameters"
+   | optionalGlobalDeclarations               => "optionalGlobalDeclarations"
+   | globalDeclaration                        => "globalDeclaration"
+   | repeatingOptionalGlobalDeclarations      => "repeatingOptionalGlobalDeclarations"
+   | optionalLocalStorageDeclarations         => "optionalLocalStorageDeclarations"
+   | repeatingOptionalStorageDeclarations     => "repeatingOptionalStorageDeclarations"
+   | term1                                    => "term1"
+   | repBOOLOPRterm1                          => "repBOOLOPRterm1"
+   | term2                                    => "term2"
+   | repRELOPRterm2                           => "repRELOPRterm2"
+   | term3                                    => "term3"
+   | repADDOPRterm3                           => "repADDOPRterm3"
+   | term4                                    => "term4"
+   | repMULTOPRterm4                          => "repMULTOPRterm4"
+   | repDOTOPRfactor                          => "repDOTOPRfactor"
+   | optionalIdent                            => "optionalIdent"
+   | monadicOperator                          => "monadicOperator"
+   | expressionList                           => "expressionList"
+   | optionalExpressions                      => "optionalExpressions"
+   | repeatingOptionalExpressions             => "repeatingOptionalExpressions"
+   | parameterList                            => "parameterList"
+   | optionalParameters                       => "optionalParameters"
+   | parameter                                => "parameter"
+   | repeatingOptionalParameters              => "repeatingOptionalParameters"
+   | recordFieldDeclaration                   => "recordFieldDeclaration"
+   | repeatingOptionalRecordFieldDeclarations => "repeatingOptionalRecordFieldDeclarations"
       
 
 val string_of_gramsym = (string_of_term, string_of_nonterm)
@@ -226,6 +230,8 @@ val productions =
 	 [N procedureDeclaration],
 	 [N recordDeclaration]]),
 (storageDeclaration,
+	[[ N optionalCHANGEMODE, N typedIdent ]]),
+(recordFieldDeclaration,
 	[[ N optionalCHANGEMODE, N typedIdent ]]),
 (optionalCHANGEMODE,
 	[[],
@@ -286,9 +292,12 @@ val productions =
 	[[],
 	 [T COMMA, N parameter, N repeatingOptionalParameters]]),
 (recordDeclaration,
-	[[T RECORD, T IDENT, N parameterStorageList]]),
-(parameterStorageList,
-	[[T LPAREN, N storageDeclaration, N repeatingOptionalStorageDeclarations, T RPAREN]]),
+	[[T RECORD, T IDENT, N recordFieldList]]),
+(recordFieldList,
+	[[T LPAREN, N storageDeclaration, N repeatingOptionalRecordFieldDeclarations, T RPAREN]]),
+(repeatingOptionalRecordFieldDeclarations,
+	[[],
+	 [T SEMICOLON, N recordFieldDeclaration, N repeatingOptionalRecordFieldDeclarations]]),
 (expressionList,
 	[[T LPAREN, N optionalExpressions, T RPAREN]]),
 (optionalExpressions,

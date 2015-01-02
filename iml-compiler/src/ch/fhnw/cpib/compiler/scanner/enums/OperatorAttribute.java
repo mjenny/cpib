@@ -11,7 +11,11 @@ public enum OperatorAttribute {
 	EQ("EQ"), NE("NE"), LT("LT"), GT("GT"), LE("LE"), GE("GE"),
 	
 	// Boolean operators
-	AND("AND"), OR("OR"), CAND("CAND"), COR("COR");
+	AND("AND"), OR("OR"), CAND("CAND"), COR("COR"),
+	
+	// Member operators
+	
+	DOT("DOT");
 	
 	private String toString;
 	

@@ -9,43 +9,100 @@ public interface ConcTree {
 
 	public class RecordDeclaration extends Declaration {
 		private final Ident ident;
-		private final ParameterStorageList parameterStorageList;
-		public RecordDeclaration(Ident ident, ParameterStorageList parameterStorageList){
+		private final RecordFieldList recordFieldList;
+		public RecordDeclaration(Ident ident, RecordFieldList recordStorageList){
 			this.ident = ident;
-			this.parameterStorageList = parameterStorageList;
+			this.recordFieldList = recordStorageList;
 		}
 		public String toString(String indent){
 			return indent
 					+ "<RecordDeclaration>\n"
 					+ ident.toString(indent + '\t')
-					+ parameterStorageList.toString(indent + '\t')
+					+ recordFieldList.toString(indent + '\t')
 					+ indent
 					+ "</RecordDeclaration>\n";
 		}
 		public AbsTree.DeclarationRecord toAbstract(RepeatingOptionalDeclarations repeatingOptionalDeclarations) {
-			return new AbsTree.DeclarationRecord(ident, parameterStorageList.toAbstract(), repeatingOptionalDeclarations.toAbstract());
+			return new AbsTree.DeclarationRecord(ident, recordFieldList.toAbstract(), repeatingOptionalDeclarations.toAbstract());
 		}
 
 	}
-	public class ParameterStorageList {
-		private final StorageDeclaration storageDeclaration;
-		private final RepeatingOptionalStorageDeclarations repeatingOptionalStorageDeclarations;
-		public ParameterStorageList(StorageDeclaration storageDeclaration, RepeatingOptionalStorageDeclarations repeatingOptionalStorageDeclarations){
-			this.storageDeclaration = storageDeclaration;
-			this.repeatingOptionalStorageDeclarations = repeatingOptionalStorageDeclarations;
+	public class RecordFieldList extends Declaration {
+		private final RecordFieldDeclaration recordFieldDeclaration;
+		private final RepeatingOptionalRecordFieldDeclarations repeatingOptionalrecordFieldDeclarations;
+		
+		public RecordFieldList(RecordFieldDeclaration recordFieldDeclaration, RepeatingOptionalRecordFieldDeclarations repeatingOptionalrecordFieldDeclarations){
+			this.recordFieldDeclaration = recordFieldDeclaration;
+			this.repeatingOptionalrecordFieldDeclarations = repeatingOptionalrecordFieldDeclarations;
 		}
 		public String toString(String indent){
 			return indent
-					+ "<ParameterStorageList>\n"
-					+ storageDeclaration.toString(indent + '\t')
-					+ repeatingOptionalStorageDeclarations.toString(indent + '\t')
-					+ "</ParameterStorageList>\n";
+					+ "<RecordFieldList>\n"
+					+ recordFieldDeclaration.toString(indent + '\t')
+					+ repeatingOptionalrecordFieldDeclarations.toString(indent + '\t')
+					+ "</RecordFieldList>\n";
 		}
-		public AbsTree.StorageParameter toAbstract(){
-			return new AbsTree.StorageParameter(storageDeclaration.toAbstract(null), repeatingOptionalStorageDeclarations.toAbstract());
+		public AbsTree.RecordField toAbstract(){
+			return new AbsTree.RecordField(recordFieldDeclaration.toAbstract(null), repeatingOptionalrecordFieldDeclarations.toAbstract());
 		}
 		
 	}
+	
+	public class RecordFieldDeclaration {
+		private final OptionalChangeMode optionalChangeMode;
+		private final TypedIdent typedIdent;
+
+		public RecordFieldDeclaration(OptionalChangeMode optionalChangeMode, TypedIdent typedIdent) {
+			this.optionalChangeMode = optionalChangeMode;
+			this.typedIdent = typedIdent;
+		}
+
+		public String toString(String indent) {
+			return indent
+					+ "<RecordFieldDeclaration>\n"
+					+ optionalChangeMode.toString(indent + '\t')
+					+ typedIdent.toString(indent + '\t')
+					+ indent
+					+ "</RecordFieldDeclaration>\n";
+		}
+		
+		public AbsTree.DeclarationRecordField toAbstract(RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclarations) {
+			return new AbsTree.DeclarationRecordField(optionalChangeMode.toAbstract(), typedIdent.toAbstract(), (repeatingOptionalRecordFieldDeclarations!=null?repeatingOptionalRecordFieldDeclarations.toAbstract():null));
+		}
+	}
+	
+	public class RepeatingOptionalRecordFieldDeclarations {
+		private final RecordFieldDeclaration recordFieldDeclaration;
+		private final RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclarations;
+		
+		public RepeatingOptionalRecordFieldDeclarations(RecordFieldDeclaration recordFieldDeclaration, RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclaration){
+			this.recordFieldDeclaration = recordFieldDeclaration;
+			this.repeatingOptionalRecordFieldDeclarations = repeatingOptionalRecordFieldDeclaration;
+			
+		}
+		public String toString(String indent){
+			return indent
+					+ "<RepeatingOptionalRecordFieldDeclarations>\n"
+					+ recordFieldDeclaration.toString(indent + '\t')
+					+ repeatingOptionalRecordFieldDeclarations.toString(indent + '\t')
+					+ indent
+					+ "</RepeatingOptionalRecordFieldDeclarations>\n";
+		}
+		public AbsTree.DeclarationRecordField toAbstract(){
+			return recordFieldDeclaration.toAbstract(repeatingOptionalRecordFieldDeclarations);
+		}
+	}
+	
+	public class RepeatingOptionalRecordFieldDeclarationsEpsilon extends RepeatingOptionalRecordFieldDeclarations{
+		public RepeatingOptionalRecordFieldDeclarationsEpsilon(){
+			super(null,null);
+		}
+		public String toString(String indent){
+			return indent + "<RepeatingOptionalRecordFieldDeclarationsEpsilon />\n";
+		}
+		public AbsTree.DeclarationRecordField toAbstract(){ return null; }
+	}
+	
 	public class RepeatingOptionalStorageDeclarations extends RepeatingOptionalDeclarations{
 		private final StorageDeclaration storageDeclaration;
 		private final RepeatingOptionalStorageDeclarations repeatingOptionalStorageDeclarations;
@@ -67,6 +124,7 @@ public interface ConcTree {
 			return storageDeclaration.toAbstract(repeatingOptionalStorageDeclarations);
 		}
 	}
+	
 	public class RepeatingOptionalStorageDeclarationsEpsilon extends RepeatingOptionalStorageDeclarations{
 		public RepeatingOptionalStorageDeclarationsEpsilon(){
 			super(null,null);
@@ -90,6 +148,7 @@ public interface ConcTree {
 		public AbsTree.Declaration toAbstract(){ return null; }
 
 	}
+	
 	public class RepeatingOptionalDeclarations{
 		private final Declaration declaration;
 		private final RepeatingOptionalDeclarations repeatingOptionalDeclarations;
@@ -98,6 +157,7 @@ public interface ConcTree {
 			this.declaration = declaration;
 			this.repeatingOptionalDeclarations = repeatingOptionalDeclarations;
 		}
+		
 		public String toString(String indent){
 			return indent
 					+ "<RepeatingOptionalDeclarations>\n"
@@ -106,6 +166,7 @@ public interface ConcTree {
 					+ indent
 					+ "</RepeatingOptionalDeclarations>\n";
 		}
+		
 		public AbsTree.Declaration toAbstract() {
 			return declaration.toAbstract(repeatingOptionalDeclarations);
 		}
@@ -222,7 +283,7 @@ public interface ConcTree {
 		}
 		
 		public AbsTree.DeclarationStore toAbstract(RepeatingOptionalDeclarations repeatingOptionalDeclarations) {
-			return new AbsTree.DeclarationStore(optionalChangeMode.toAbstract(), typedIdent.toAbstract(), repeatingOptionalDeclarations.toAbstract());
+			return new AbsTree.DeclarationStore(optionalChangeMode.toAbstract(), typedIdent.toAbstract(), (repeatingOptionalDeclarations!=null?repeatingOptionalDeclarations.toAbstract():null));
 		}
 	}
 	

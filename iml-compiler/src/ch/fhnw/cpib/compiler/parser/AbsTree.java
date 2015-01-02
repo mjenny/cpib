@@ -7,29 +7,31 @@ import ch.fhnw.cpib.compiler.scanner.token.Mode.*;
 public interface AbsTree {
 	
 	//gemacht 18.12.
-	public class StorageParameter {
-		private final DeclarationStore declarationStore;
-		private final DeclarationStore nextDeclarationStore;
+	public class RecordField {
+		private final DeclarationRecordField declarationRecordField;
+		private final DeclarationRecordField nextDeclarationRecordField;
 		
-		public StorageParameter(DeclarationStore delcarationStore, DeclarationStore next){
-			this.declarationStore = delcarationStore;
-			this.nextDeclarationStore = next;
+		public RecordField(DeclarationRecordField delcarationRecordField, DeclarationRecordField next){
+			this.declarationRecordField = delcarationRecordField;
+			this.nextDeclarationRecordField = next;
 		}
 		public String toString(String indent){
 			return indent
-					+ "<StorageParameter>\n"
-					+ declarationStore.toString(indent + '\t')
-					+ nextDeclarationStore.toString(indent + '\t')
+					+ "<RecordField>\n"
+					+ declarationRecordField.toString(indent + '\t')
+					+ nextDeclarationRecordField.toString(indent + '\t')
 					+ indent
-					+ "</StorageParameter>\n";
+					+ "</RecordField>\n";
 		}
-		public DeclarationStore getDeclarationStore(){
-			return declarationStore;
+		public DeclarationRecordField getDeclarationRecordField(){
+			return declarationRecordField;
 		}
-		public DeclarationStore getNextDeclarationStore(){
-			return nextDeclarationStore;
+		public DeclarationRecordField getNextDeclarationRecordField(){
+			return nextDeclarationRecordField;
 		}
 	}
+	
+	
 	//gefixt
 	public class ProgramParameter {
 		private final FlowMode flowMode;
@@ -74,7 +76,7 @@ public interface AbsTree {
 			return indent
 							+ "<Program>\n"
 							+ ident.toString(indent + '\t')
-							+ programParameter.toString(indent + '\t')
+							+ (programParameter!=null?programParameter.toString(indent + '\t'):"<noProgramParameter/>\t")
 							+ declaration.toString(indent + '\t')
 							+ cmd.toString(indent + '\t')
 							+ indent
@@ -206,9 +208,9 @@ public interface AbsTree {
 	}
 	public class DeclarationRecord extends Declaration {
 		private final Ident ident;
-		private final StorageParameter storageParameter;
+		private final RecordField storageParameter;
 		
-		public DeclarationRecord(Ident ident, StorageParameter storageParameter, Declaration nextDeclaration) {
+		public DeclarationRecord(Ident ident, RecordField storageParameter, Declaration nextDeclaration) {
 			super(nextDeclaration);
 			this.ident = ident;
 			this.storageParameter = storageParameter;
@@ -224,8 +226,39 @@ public interface AbsTree {
 		}
 		
 		public Ident getIdent() { return ident; }
-		public StorageParameter getStorageParameter(){ return storageParameter; }
+		public RecordField getStorageParameter(){ return storageParameter; }
 	}
+	
+	public class DeclarationRecordField {
+		private final ChangeMode changeMode;
+		private final TypedIdent typedIdent;
+		private final DeclarationRecordField nextDeclarationRecordField;
+
+		public DeclarationRecordField(ChangeMode changeMode, TypedIdent typedIdent, DeclarationRecordField nextDeclarationRecordField) {
+			this.changeMode = changeMode;
+			this.typedIdent = typedIdent;
+			this.nextDeclarationRecordField = nextDeclarationRecordField;
+		}
+
+		public String toString(final String indent) {
+			return indent
+					+ "<DeclarationRecordField>\n"
+					+ changeMode.toString(indent + '\t')
+					+ typedIdent.toString(indent + '\t')
+					+ ((nextDeclarationRecordField!=null)?nextDeclarationRecordField.toString(indent + '\t'):"")
+					+ indent
+					+ "</DeclarationRecordField>\n";
+		}
+		public ChangeMode getChangeMode() {
+            return changeMode;
+        }
+
+        public TypedIdent getTypedIdent() {
+            return typedIdent;
+        }
+
+	}
+	
 	//18.12.
 	public class Parameter {
 		private final FlowMode flowMode;

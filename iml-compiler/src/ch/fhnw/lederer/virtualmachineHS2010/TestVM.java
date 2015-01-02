@@ -1,4 +1,4 @@
-package ch.fhnw.cpib.vm;
+package ch.fhnw.lederer.virtualmachineHS2010;
 
 /* Dr. Edgar Lederer, Fachhochschule Nordwestschweiz */
 

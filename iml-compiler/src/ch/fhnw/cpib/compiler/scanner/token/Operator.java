@@ -126,6 +126,7 @@ public abstract class Operator extends AbstractToken {
 		}
 		
 	}
+	
 	/**
 	 * Class for DotOpr
 	 */
@@ -134,13 +135,10 @@ public abstract class Operator extends AbstractToken {
 		/**
 		 * Serial id which is used for deep copy
 		 */
-		private static final long serialVersionUID = 3366616738652185830L;
+		private static final long serialVersionUID = -6111066864207707211L;
 
-		public DotOpr(OperatorAttribute attribute) {
-			super(Terminals.RELOPR, attribute);
-			assert(OperatorAttribute.EQ == attribute || OperatorAttribute.NE == attribute ||
-					OperatorAttribute.LT == attribute || OperatorAttribute.GT == attribute || 
-					OperatorAttribute.LE == attribute || OperatorAttribute.GE == attribute);
+		public DotOpr() {
+			super(Terminals.RELOPR, OperatorAttribute.DOT);
 		}
 		
 	}

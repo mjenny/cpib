@@ -1,0 +1,12 @@
+program refParams()
+global
+	var g:int32; record vector(var x:int32; y:int32; z:int32); var v1:vector
+do
+	debugin v1 init;
+	v1.x := 1;
+	debugin g init;
+	g := g + 1;
+	g := g + 1;
+	g := g + g;
+	debugout g
+endprogram
