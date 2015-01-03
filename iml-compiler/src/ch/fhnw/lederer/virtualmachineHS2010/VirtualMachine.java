@@ -763,7 +763,7 @@ public class VirtualMachine implements IVirtualMachine
 
         public void execute() throws ExecutionError
         {
-            System.out.print("?" + indicator + " : bool = ");
+            System.out.print("debugin " + indicator + " : bool = ");
             boolean input= readBool();
             int address= Data.intGet(store[sp - 1]);
             store[address]= Data.boolNew(input);
@@ -791,7 +791,7 @@ public class VirtualMachine implements IVirtualMachine
 
         public void execute() throws ExecutionError
         {
-            System.out.print("?" + indicator + " : int = ");
+            System.out.print("debugin " + indicator + " : int = ");
             int input= readInt();
             int address= Data.intGet(store[sp - 1]);
             store[address]= Data.intNew(input);
@@ -821,7 +821,7 @@ public class VirtualMachine implements IVirtualMachine
         {
             sp= sp - 1;
             boolean output= Data.boolGet(store[sp]);
-            System.out.println("!" + indicator + " : bool = " + output);
+            System.out.println("debugout " + indicator + " : bool = " + output);
             pc= pc + 1;
         }
 
@@ -847,7 +847,7 @@ public class VirtualMachine implements IVirtualMachine
         {
             sp= sp - 1;
             int output= Data.intGet(store[sp]);
-            System.out.println("!" + indicator + " : int = " + output);
+            System.out.println("debugout " + indicator + " : int = " + output);
             pc= pc + 1;
         }
 

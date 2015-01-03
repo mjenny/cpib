@@ -27,7 +27,7 @@ public interface ConcTree {
 		}
 
 	}
-	public class RecordFieldList extends Declaration {
+	public class RecordFieldList {
 		private final RecordFieldDeclaration recordFieldDeclaration;
 		private final RepeatingOptionalRecordFieldDeclarations repeatingOptionalrecordFieldDeclarations;
 		
@@ -43,7 +43,7 @@ public interface ConcTree {
 					+ "</RecordFieldList>\n";
 		}
 		public AbsTree.RecordField toAbstract(){
-			return new AbsTree.RecordField(recordFieldDeclaration.toAbstract(null), repeatingOptionalrecordFieldDeclarations.toAbstract());
+			return new AbsTree.RecordField(recordFieldDeclaration.toAbstract(repeatingOptionalrecordFieldDeclarations));
 		}
 		
 	}
@@ -67,7 +67,7 @@ public interface ConcTree {
 		}
 		
 		public AbsTree.DeclarationRecordField toAbstract(RepeatingOptionalRecordFieldDeclarations repeatingOptionalRecordFieldDeclarations) {
-			return new AbsTree.DeclarationRecordField(optionalChangeMode.toAbstract(), typedIdent.toAbstract(), (repeatingOptionalRecordFieldDeclarations!=null?repeatingOptionalRecordFieldDeclarations.toAbstract():null));
+			return new AbsTree.DeclarationRecordField(optionalChangeMode.toAbstract(), typedIdent.toAbstract(), ((repeatingOptionalRecordFieldDeclarations!=null)?repeatingOptionalRecordFieldDeclarations.toAbstract():null));
 		}
 	}
 	

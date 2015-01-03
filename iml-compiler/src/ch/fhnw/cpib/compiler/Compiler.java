@@ -17,11 +17,7 @@ import ch.fhnw.cpib.compiler.scanner.ITokenList;
 import ch.fhnw.cpib.compiler.scanner.Scanner;
 import ch.fhnw.cpib.vm.Machine;
 import ch.fhnw.cpib.vm.MachineError;
-import ch.fhnw.lederer.virtualmachineHS2010.IVirtualMachine;
-import ch.fhnw.lederer.virtualmachineHS2010.VirtualMachine;
-import ch.fhnw.lederer.virtualmachineHS2010.IVirtualMachine.CodeTooSmallError;
 import ch.fhnw.lederer.virtualmachineHS2010.IVirtualMachine.ExecutionError;
-import ch.fhnw.lederer.virtualmachineHS2010.IVirtualMachine.HeapTooSmallError;
 
 public class Compiler {
 	private static final int CODE_SIZE = 1000;

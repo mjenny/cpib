@@ -138,7 +138,7 @@ public abstract class Operator extends AbstractToken {
 		private static final long serialVersionUID = -6111066864207707211L;
 
 		public DotOpr() {
-			super(Terminals.RELOPR, OperatorAttribute.DOT);
+			super(Terminals.DOTOPR, OperatorAttribute.DOT);
 		}
 		
 	}

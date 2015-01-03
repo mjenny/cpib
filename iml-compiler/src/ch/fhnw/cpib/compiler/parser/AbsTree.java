@@ -3,17 +3,109 @@ package ch.fhnw.cpib.compiler.parser;
 
 import ch.fhnw.cpib.compiler.scanner.token.*;
 import ch.fhnw.cpib.compiler.scanner.token.Mode.*;
+import ch.fhnw.lederer.virtualmachineHS2010.IVirtualMachine.HeapTooSmallError;
+import ch.fhnw.cpib.compiler.error.ContextError;
 
 public interface AbsTree {
 	
-	//gemacht 18.12.
+	public class Program {
+		private final Ident ident;
+		private final Declaration declaration;
+		private final Cmd cmd;
+		private final ProgramParameter programParameter;
+		
+		public Program(Ident ident,ProgramParameter programParameter, Declaration declaration, Cmd cmd){
+			this.ident = ident;
+			this.programParameter = programParameter;
+			this.declaration = declaration;
+			this.cmd = cmd;
+		}
+		
+		public String toString(String indent){
+			return indent
+							+ "<Program>\n"
+							+ ident.toString(indent + '\t')
+							+ (programParameter!=null?programParameter.toString(indent + '\t'):"<noProgramParameter/>\t")
+							+ declaration.toString(indent + '\t')
+							+ cmd.toString(indent + '\t')
+							+ indent
+							+ "</Program>\n";
+		}
+		
+		public String toString(){
+			return toString("");
+		}
+		
+		public Declaration getDeclarations(){return declaration;}
+		public Cmd getCommands(){return cmd;}
+		public Ident getIdent(){return ident;}
+		public ProgramParameter getProgramParameter(){return programParameter;}
+		
+		public void check() throws ContextError, HeapTooSmallError {
+			//programParameter.checkDeclaration();
+			//declaration.checkDeclaration();
+			//cmd.check();
+		}
+		
+	}
+	
+	public class ProgramParameter {
+		private final FlowMode flowMode;
+		private final ChangeMode changeMode;
+		private final TypedIdent typedIdent;
+		private final ProgramParameter nextProgramParameter;
+		
+		public ProgramParameter(FlowMode flowMode, ChangeMode changeMode, TypedIdent typedIdent, ProgramParameter next){
+			this.flowMode = flowMode;
+			this.changeMode = changeMode;
+			this.typedIdent = typedIdent;
+			this.nextProgramParameter = next;
+		}
+		
+		public String toString(String indent) {
+			return indent
+					+ "<ProgramParameter>\n"
+					+ flowMode.toString(indent + '\t')
+					+ changeMode.toString(indent + '\t')
+					+ typedIdent.toString(indent + '\t')
+					+ nextProgramParameter.toString(indent + '\t')
+					+ indent
+					+ "</ProgramParameter>\n";
+		}
+		
+		public FlowMode getFlowMode() { return flowMode; }
+		public ChangeMode getChangeMode() { return changeMode; }
+		public TypedIdent getTypedIdent() { return typedIdent; }
+		public ProgramParameter getNextProgramParameter() { return nextProgramParameter; }
+		
+		public void checkDeclaration() throws ContextError, HeapTooSmallError {
+			
+		}
+	}
+	
+	public class Declaration {
+		protected final Declaration nextDecl;
+		
+		public Declaration(Declaration next){
+			this.nextDecl = next;
+		}
+		public String toString(String indent){
+			return indent
+					+ "<Decl>\n"
+					+ (nextDecl != null?nextDecl.toString(indent + '\t'):indent+"\t<noNextElement/>\n")
+					+ indent
+					+ "</Decl>\n";
+		}
+		public Declaration getNextDecl(){ return nextDecl; }
+	}
+	
 	public class RecordField {
 		private final DeclarationRecordField declarationRecordField;
 		private final DeclarationRecordField nextDeclarationRecordField;
 		
-		public RecordField(DeclarationRecordField delcarationRecordField, DeclarationRecordField next){
+		public RecordField(DeclarationRecordField delcarationRecordField){
 			this.declarationRecordField = delcarationRecordField;
-			this.nextDeclarationRecordField = next;
+			this.nextDeclarationRecordField = declarationRecordField.getNextDeclarationRecordField();
 		}
 		public String toString(String indent){
 			return indent
@@ -31,81 +123,6 @@ public interface AbsTree {
 		}
 	}
 	
-	
-	//gefixt
-	public class ProgramParameter {
-		private final FlowMode flowMode;
-		private final ChangeMode changeMode;
-		private final TypedIdent typedIdent;
-		private final ProgramParameter nextProgramParameter;
-		
-		public ProgramParameter(FlowMode flowMode, ChangeMode changeMode, TypedIdent typedIdent, ProgramParameter next){
-			this.flowMode = flowMode;
-			this.changeMode = changeMode;
-			this.typedIdent = typedIdent;
-			this.nextProgramParameter = next;
-		}
-		public String toString(String indent) {
-			return indent
-					+ "<ProgramParameter>\n"
-					+ flowMode.toString(indent + '\t')
-					+ changeMode.toString(indent + '\t')
-					+ typedIdent.toString(indent + '\t')
-					+ nextProgramParameter.toString(indent + '\t')
-					+ indent
-					+ "</ProgramParameter>\n";
-		}
-		public FlowMode getFlowMode() { return flowMode; }
-		public ChangeMode getChangeMode() { return changeMode; }
-		public TypedIdent getTypedIdent() { return typedIdent; }
-		public ProgramParameter getNextProgramParameter() { return nextProgramParameter; }
-	}
-	public class Program {
-		private final Ident ident;
-		private final Declaration declaration;
-		private final Cmd cmd;
-		private final ProgramParameter programParameter;
-		
-		public Program(Ident ident,ProgramParameter programParameter, Declaration declaration, Cmd cmd){
-			this.ident = ident;
-			this.programParameter = programParameter;
-			this.declaration = declaration;
-			this.cmd = cmd;
-		}
-		public String toString(String indent){
-			return indent
-							+ "<Program>\n"
-							+ ident.toString(indent + '\t')
-							+ (programParameter!=null?programParameter.toString(indent + '\t'):"<noProgramParameter/>\t")
-							+ declaration.toString(indent + '\t')
-							+ cmd.toString(indent + '\t')
-							+ indent
-							+ "</Program>\n";
-		}
-		public String toString(){
-			return toString("");
-		}
-		public Declaration getDeclarations(){return declaration;}
-		public Cmd getCommands(){return cmd;}
-		public Ident getIdent(){return ident;}
-		public ProgramParameter getProgramParameter(){return programParameter;}
-		
-	}
-	public class Declaration {
-		protected final Declaration nextDecl;
-		
-		public Declaration(Declaration next){
-			this.nextDecl = next;
-		}
-		public String toString(String indent){
-			return indent
-					+ "<Decl>\n"
-					+ (nextDecl != null?nextDecl.toString(indent + '\t'):indent+"\t<noNextElement/>\n")
-					+ indent
-					+ "</Decl>\n";
-		}
-		public Declaration getNextDecl(){ return nextDecl; }
-	}
 	public class DeclarationFunction extends Declaration{
 		private final Ident ident;
 		private final Parameter param;
@@ -208,25 +225,25 @@ public interface AbsTree {
 	}
 	public class DeclarationRecord extends Declaration {
 		private final Ident ident;
-		private final RecordField storageParameter;
+		private final RecordField recordField;
 		
-		public DeclarationRecord(Ident ident, RecordField storageParameter, Declaration nextDeclaration) {
+		public DeclarationRecord(Ident ident, RecordField recordField, Declaration nextDeclaration) {
 			super(nextDeclaration);
 			this.ident = ident;
-			this.storageParameter = storageParameter;
+			this.recordField = recordField;
 		}
 		public String toString(final String indent) {
 			return indent
 					+ "<DeclarationRecord>\n"
 					+ ident.toString(indent + '\t')
-					+ storageParameter.toString(indent + '\t')
+					+ recordField.toString(indent + '\t')
 					+ super.toString(indent + '\t')
 					+ indent
 					+ "</DeclarationRecord>\n";
 		}
 		
 		public Ident getIdent() { return ident; }
-		public RecordField getStorageParameter(){ return storageParameter; }
+		public RecordField getRecordField(){ return recordField; }
 	}
 	
 	public class DeclarationRecordField {
@@ -255,6 +272,10 @@ public interface AbsTree {
 
         public TypedIdent getTypedIdent() {
             return typedIdent;
+        }
+        
+        public DeclarationRecordField getNextDeclarationRecordField() {
+        	return nextDeclarationRecordField;
         }
 
 	}

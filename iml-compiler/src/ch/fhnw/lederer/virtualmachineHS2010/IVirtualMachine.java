@@ -2,6 +2,7 @@ package ch.fhnw.lederer.virtualmachineHS2010;
 
 /* Dr. Edgar Lederer, Fachhochschule Nordwestschweiz */
 
+@SuppressWarnings("serial")
 public interface IVirtualMachine
 {
     boolean readYesNo() throws ExecutionError;

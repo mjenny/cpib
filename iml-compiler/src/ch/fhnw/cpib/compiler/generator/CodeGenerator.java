@@ -2,22 +2,33 @@ package ch.fhnw.cpib.compiler.generator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import ch.fhnw.cpib.compiler.error.GenerationError;
-import ch.fhnw.cpib.compiler.parser.AbsTree.DeclarationProcedure;
-import ch.fhnw.cpib.compiler.parser.AbsTree.Declaration;
-import ch.fhnw.cpib.compiler.parser.AbsTree.DeclarationFunction;
 import ch.fhnw.cpib.compiler.parser.AbsTree.*;
+import ch.fhnw.cpib.compiler.scanner.enums.ModeAttribute;
 import ch.fhnw.cpib.compiler.scanner.enums.OperatorAttribute;
 import ch.fhnw.cpib.compiler.scanner.enums.Terminals;
-
+import ch.fhnw.cpib.compiler.scanner.enums.TypeAttribute;
 
 /**
  * This class generates vm code from a abstract syntax tree
  * 
  */
 public class CodeGenerator {
+	
+	/**
+	 * 
+	 * @author Manuel
+	 *
+	 */
+	public enum AdditionalInstruction {
+		IN, OUT, DEREF, NONE;
+	}
+	
+	/**
+	 * 
+	 */
+	private AdditionalInstruction additionalInstruction = AdditionalInstruction.NONE;
 	
 	/**
 	 * The starting point from the abstract syntax tree
@@ -37,17 +48,12 @@ public class CodeGenerator {
 	/**
 	 * The storage for the addresses of the variables
 	 */
-	private HashMap<String,Integer> variables = new HashMap<String,Integer>();
+	private HashMap<String,Object> variables = new HashMap<String,Object>();
 	
 	/**
 	 * Helper for defined records
 	 */
-	private HashMap<String,List<TypedIdent>> records = new HashMap<String,List<TypedIdent>>();
-	
-	/**
-	 * Helper for initialized records
-	 */
-	private HashMap<String,List<TypedIdent>> initRecords = new HashMap<String,List<TypedIdent>>();
+	private HashMap<String,ArrayList<DeclarationRecordField>> records = new HashMap<String,ArrayList<DeclarationRecordField>>();
 	
 	/**
 	 * A multi dimension counter of commands
@@ -77,26 +83,46 @@ public class CodeGenerator {
 		Declaration declaration = tree.getDeclarations();
 		Cmd commands = tree.getCommands();
 
+		// do record Declarations
+		Declaration currentDeclaration = declaration;
+		while(currentDeclaration != null){
+			if(currentDeclaration instanceof DeclarationRecord) buildRecord(currentDeclaration);
+			currentDeclaration = currentDeclaration.getNextDecl();
+		}
+		
 		// do store Declaration
 		int storeCount = 0;
-		Declaration currentDeclaration = declaration;
+		currentDeclaration = declaration;
 		while (currentDeclaration != null) {
 			if (currentDeclaration instanceof DeclarationStore) {
 				if(((DeclarationStore) currentDeclaration).getTypedIdent() instanceof TypedIdentType){
-					TypedIdentType typedIdent = (TypedIdentType)((DeclarationStore) currentDeclaration).getTypedIdent();
-					variables.put(typedIdent.getIdent().getName(), storeCount);
+					//TypedIdentType typedIdent = (TypedIdentType)((DeclarationStore) currentDeclaration).getTypedIdent();
+					DeclarationStore ds = (DeclarationStore) currentDeclaration;
+					TypedIdentType typedIdent = (TypedIdentType)ds.getTypedIdent();
+					Store store = new Store(typedIdent.getIdent().getName(), ds.getTypedIdent(), (ds.getChangeMode().getAttribute()==ModeAttribute.CONST));
+					store.setAddress(storeCount);
+					variables.put(typedIdent.getIdent().getName(), store);
 					storeCount++;
 				}else if(((DeclarationStore) currentDeclaration).getTypedIdent() instanceof TypedIdentIdent){
-					TypedIdentIdent typedIdent = (TypedIdentIdent)((DeclarationStore) currentDeclaration).getTypedIdent();
+					DeclarationStore ds = (DeclarationStore) currentDeclaration;
+					TypedIdentIdent typedIdent = (TypedIdentIdent)ds.getTypedIdent();
 					//Check if TypeIdent is already declared
 					
 					if(records.containsKey(typedIdent.getTypeIdent().getName())) {
-						variables.put(typedIdent.getIdent().getName(), storeCount);
-						storeCount++;
+						ArrayList<Store> al = new ArrayList<Store>();
+						for (DeclarationRecordField item : records.get(typedIdent.getTypeIdent().getName())) {
+							Store s = new Store(
+									((TypedIdentType)item.getTypedIdent()).getIdent().getName(),
+									item.getTypedIdent(), (item.getChangeMode().getAttribute()==ModeAttribute.CONST));
+							s.setAddress(storeCount);
+							al.add(s);
+							storeCount++;
+						}
+						variables.put(typedIdent.getIdent().getName(), al);
+						//variables.put(typedIdent.getIdent().getName(), storeCount);
+						//storeCount++;
 					}else throw new GenerationError("Record "+typedIdent.getTypeIdent().getName()+" is not declared!");	
 				}
-				
-			} else if (currentDeclaration instanceof DeclarationRecord) {
 				
 			}
 
@@ -127,12 +153,7 @@ public class CodeGenerator {
 			if (declaration instanceof DeclarationProcedure) buildRoutine(declaration, false);
 			currentDeclaration = currentDeclaration.getNextDecl();
 		}
-		// do record Declarations
-		currentDeclaration = declaration;
-		while(currentDeclaration != null){
-			if(declaration instanceof DeclarationRecord) buildRecord(declaration);
-			currentDeclaration = currentDeclaration.getNextDecl();
-		}
+		
 		// TODO: replace routine call addresses
 		
 		// remove the last comma
@@ -142,9 +163,17 @@ public class CodeGenerator {
 		return code.toString();
 	}
 	
-	private void buildRecord(Declaration declaration) {
-		// TODO Auto-generated method stub
-
+	private void buildRecord(Declaration declaration) throws GenerationError {
+		DeclarationRecord dr = (DeclarationRecord) declaration;
+		if(!records.containsKey(dr.getIdent().getName())) {
+			DeclarationRecordField currentRF = dr.getRecordField().getDeclarationRecordField();
+			ArrayList<DeclarationRecordField> rfList = new ArrayList<DeclarationRecordField>();
+			while (currentRF != null) {
+				rfList.add(currentRF);
+				currentRF = currentRF.getNextDeclarationRecordField();
+			}
+			records.put(((DeclarationRecord) dr).getIdent().getName(), rfList);
+		}else throw new GenerationError("Record "+((DeclarationRecord) dr).getIdent().getName()+" is already declared!");
 	}
 
 	/**
@@ -186,13 +215,22 @@ public class CodeGenerator {
 	private void buildCmdAssi(CmdAssi cmd) throws GenerationError {
 		if (cmd.getTargetExpression() instanceof ExprStore) {
 			// resolve the source expression
+			additionalInstruction = AdditionalInstruction.DEREF;
 			resolveExpression(cmd.getSourceExpression());
-			
+			additionalInstruction = AdditionalInstruction.NONE;
 			// get the address for the target variable
 			String variableName = ((ExprStore) cmd.getTargetExpression()).getIdent().getName();
-			addLine("IntLoad", variables.get(variableName));
+			addLine("IntLoad", ((Store)variables.get(variableName)).getAddress());
 			
 			// store the source in the target variable
+			addLine("Store");
+		} else if(cmd.getTargetExpression() instanceof ExprDyadic) {
+			// resolve the source expression
+			additionalInstruction = AdditionalInstruction.DEREF;
+			resolveExpression(cmd.getSourceExpression());
+			additionalInstruction = AdditionalInstruction.NONE;
+			
+			resolveExpression(cmd.getTargetExpression());
 			addLine("Store");
 		} else throw new GenerationError("wrong target expression for Cmd Assi");
 	}
@@ -246,27 +284,47 @@ public class CodeGenerator {
 	 * This builds the code for a user input
 	 * @param Cmd from the Abstract Tree
 	 */
-	private void buildCmdInput(CmdInput cmd) {
-		
-		ExprStore expr = (ExprStore) cmd.getExpr();
-		String variableName = expr.getIdent().getName();
-		
-		addLine("IntLoad", variables.get(variableName));
-		addLine("IntInput", variableName);
+	private void buildCmdInput(CmdInput cmd) throws GenerationError {
+		if (cmd.getExpr() instanceof ExprDyadic) {
+			additionalInstruction = AdditionalInstruction.IN;
+			resolveExpression(cmd.getExpr());
+			additionalInstruction = AdditionalInstruction.NONE;
+		} else {
+			ExprStore expr = (ExprStore) cmd.getExpr();
+			String variableName = expr.getIdent().getName();
+
+			Store s = ((Store)variables.get(variableName));
+			String type = "Bool";
+			if (((TypedIdentType)s.getType()).getType().getAttribute() == TypeAttribute.INT32)
+				type = "Int";
+			addLine("IntLoad", ((Store)variables.get(variableName)).getAddress());
+			addLine(type +"Input", variableName);
+		}
+
 	}
 	
 	/**
 	 * This builds the code for a output to the console
 	 * @param Cmd from the Abstract Tree
 	 */
-	private void buildCmdOutput(CmdOutput cmd) {
+	private void buildCmdOutput(CmdOutput cmd) throws GenerationError {
 		
-		ExprStore expr = (ExprStore) cmd.getExpr();
-		String variableName = expr.getIdent().getName();
-		
-		addLine("IntLoad", variables.get(variableName));
-		addLine("Deref");
-		addLine("IntOutput", variableName);
+		if (cmd.getExpr() instanceof ExprDyadic) {
+			additionalInstruction = AdditionalInstruction.OUT;
+			resolveExpression(cmd.getExpr());
+			additionalInstruction = AdditionalInstruction.NONE;
+		} else {
+			ExprStore expr = (ExprStore) cmd.getExpr();
+			String variableName = expr.getIdent().getName();
+			
+			Store s = ((Store)variables.get(variableName));
+			String type = "Bool";
+			if (((TypedIdentType)s.getType()).getType().getAttribute() == TypeAttribute.INT32)
+				type = "Int";
+			addLine("IntLoad", ((Store)variables.get(variableName)).getAddress());
+			addLine("Deref");
+			addLine(type + "Output", variableName);
+		}
 	}
 	
 	/**
@@ -357,7 +415,6 @@ public class CodeGenerator {
 	 * This handles bool operations, relative operations and maths
 	 * @param ExprDyadic from the AbstractTree
 	 * @throws GenerationError
-	 * TODO: Dot behandeln
 	 */
 	private void resolveExprDyadic(ExprDyadic e) throws GenerationError {
 		if (e.getOperator().getTerminal() == Terminals.BOOLOPR) {
@@ -382,8 +439,12 @@ public class CodeGenerator {
 				   e.getOperator().getTerminal() == Terminals.RELOPR ||
 				   e.getOperator().getTerminal() == Terminals.DOTOPR) {
 			
-			resolveExpression(e.getExpr1());
-			resolveExpression(e.getExpr2());
+			if (e.getOperator().getTerminal() == Terminals.DOTOPR) {
+				resolveExprDyadicDOT(((ExprStore)e.getExpr1()), ((ExprStore)e.getExpr2()));
+			} else {
+				resolveExpression(e.getExpr1());
+				resolveExpression(e.getExpr2());
+			}
 			
 			switch (String.valueOf(e.getOperator().getOperatorAttribute())) {
 				case "PLUS": addLine("IntAdd"); break;
@@ -391,12 +452,44 @@ public class CodeGenerator {
 				case "TIMES": addLine("IntMult"); break;
 				case "DIV": addLine("IntDiv"); break;
 				case "MOD": addLine("IntMod"); break;
-				//TODO: what to do in case of DOT
 				case "DOT": break;
 				default: addLine("Int" + e.getOperator().getOperatorAttribute()); break;
 			}
 		} 
 		else throw new GenerationError("unknown terminal for a Dyadic Expression");
+	}
+	
+	/**
+	 * 
+	 * @throws GenerationError
+	 */
+	private void resolveExprDyadicDOT(ExprStore e1, ExprStore e2) throws GenerationError {
+		@SuppressWarnings("unchecked")
+		ArrayList<Store> vars = (ArrayList<Store>)variables.get(e2.getIdent().getName());
+		Store s = null;
+		for (Store item : vars) {
+			if (item.getIdent().equals(e1.getIdent().getName())) {
+				s = item;
+				break;
+			}
+		}
+		if (s != null) {
+			String type = "Bool";
+			if(((TypedIdentType)s.getType()).getType().getAttribute() == TypeAttribute.INT32) {
+				type = "Int";
+			}
+			addLine("IntLoad", s.getAddress());
+			if (additionalInstruction == AdditionalInstruction.IN)
+				addLine(type + "Input", e2.getIdent().getName() + "." + e1.getIdent().getName());
+			if (additionalInstruction == AdditionalInstruction.OUT) {
+				addLine("Deref");
+				addLine(type + "Output", e2.getIdent().getName() + "." + e1.getIdent().getName());
+			} 
+			if (additionalInstruction == AdditionalInstruction.DEREF)
+				addLine("Deref");
+		} else throw new GenerationError("unknown record field " + 
+				e1.getIdent().getName() + " for record " + 
+				e2.getIdent().getName());
 	}
 	
 	/**
@@ -419,11 +512,18 @@ public class CodeGenerator {
 	 * @param ExprLiteral from the AbstractTree
 	 */
 	private void resolveExprLiteral(ExprLiteral e) {
-		addLine("IntLoad", e.getLiteral().getIntVal());
+		if(e.getLiteral().isBoolean()) {
+			if(e.getLiteral().getBoolVal())
+				addLine("IntLoad", 1);
+			else
+				addLine("IntLoad", 0);
+		} else {
+			addLine("IntLoad", e.getLiteral().getIntVal());
+		}
 	}
 	
 	/**
-	 * This inverts the value of a expression
+	 * This inverts the value of an expression
 	 * @param ExprMonadic from the AbstractTree
 	 * @throws GenerationError
 	 */
@@ -441,7 +541,7 @@ public class CodeGenerator {
 	 * @param ExprStore from the AbstractTree
 	 */
 	private void resolveExprStore(ExprStore e) {
-		addLine("IntLoad", variables.get(e.getIdent().getName()));
+		addLine("IntLoad", ((Store)variables.get(e.getIdent().getName())).getAddress());
 		addLine("Deref");
 	}
 
