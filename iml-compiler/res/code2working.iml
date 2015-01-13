@@ -1,0 +1,21 @@
+program prog()
+global
+	record vector(var x:int32; y:int32; z:int32);
+	var v1:vector;
+	record vector2(x:int32; y:int32; z:int32);
+	v2:vector2;
+	var c:int32
+do
+	debugin v1.x init;
+	debugin v2.x init;
+	c init := 1;
+	while c < 5 do
+		v1.x := v1.x + 1;
+		c := c + 1
+	endwhile;
+	if v1.x < 10 then
+		debugout v1.x
+	else
+		debugout v2.x
+	endif
+endprogram
